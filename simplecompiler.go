@@ -31,6 +31,46 @@ const (
 var keywords []string = []string{"if", "while", "print", "func", "end"}
 var comparisons []string = []string{"==", ">=", "<=", "!="}
 
+///////////
+// NODES //
+///////////
+
+type Node struct{}
+
+type Assignement struct {
+	varName  string
+	varValue mathExpr
+}
+
+type PrintStatement struct {
+	expr mathExpr
+}
+
+type IfStatement struct {
+	condition boolExpr
+	block     []Node
+}
+
+type WhileStatement struct {
+	condition boolExpr
+	block     []Node
+}
+
+type FuncStatement struct {
+	funcName string
+	block    []Node
+}
+
+type mathExpr struct {
+	left     int
+	operator string
+	right    mathExpr
+}
+
+//////////
+// MAIN //
+//////////
+
 func main() {
 	args := os.Args[1:] // Skip the program name
 	content, err := os.ReadFile(args[0])
