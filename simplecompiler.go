@@ -26,26 +26,10 @@ const (
 	reservedKeyword string = "Keyword"
 	operator        string = "Operator"
 	comparison      string = "Comparison"
-	punctuation     string = "Punctuation"
 )
 
-var keywords []string = []string{"if", "var", "while", "print"}
+var keywords []string = []string{"if", "while", "print", "func", "end"}
 var comparisons []string = []string{"==", ">=", "<=", "!="}
-
-///////////
-// NODES //
-///////////
-
-type Node struct{}
-
-type Assignement struct {
-	varName  string
-	varValue int
-}
-
-//////////
-// MAIN //
-//////////
 
 func main() {
 	args := os.Args[1:] // Skip the program name
@@ -87,10 +71,8 @@ func tokenize(program string) []Token {
 			}
 		}
 		switch ch {
-		case '+', '-', '*', '/', '=':
+		case '+', '-', '=':
 			tokenizedProgram = append(tokenizedProgram, Token{value: string(program[i]), tokenType: operator, line: line})
-		case '{', '}', ';':
-			tokenizedProgram = append(tokenizedProgram, Token{value: string(program[i]), tokenType: punctuation, line: line})
 		case '>', '<':
 			tokenizedProgram = append(tokenizedProgram, Token{value: string(program[i]), tokenType: comparison, line: line})
 		default:
@@ -118,16 +100,29 @@ func tokenize(program string) []Token {
 }
 
 ///////////
-// PARSE //
-///////////
-
-func parse(tokenizeProgram []Token) []Node {
-
-}
-
-///////////
 // UTILS //
 ///////////
+
+func inList(liste []string, item string) bool {
+	for _, element := range liste {
+		if element == item {
+			return true
+		}
+	}
+	return false
+}
+
+func isValidIdentifier(x string) bool {
+	if len(x) == 0 {
+		return false
+	}
+	for _, c := range x {
+		if !strings.Contains("azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN", string(c)) {
+			return false
+		}
+	}
+	return true
+}
 
 func isInt(x string) bool {
 	if len(x) == 0 {
@@ -153,25 +148,4 @@ func strToInt(x string) int {
 		return -1
 	}
 	return num
-}
-
-func isValidIdentifier(x string) bool {
-	if len(x) == 0 {
-		return false
-	}
-	for _, c := range x {
-		if !strings.Contains("azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN", string(c)) {
-			return false
-		}
-	}
-	return true
-}
-
-func inList(liste []string, item string) bool {
-	for _, element := range liste {
-		if element == item {
-			return true
-		}
-	}
-	return false
 }
