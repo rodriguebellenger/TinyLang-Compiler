@@ -6,8 +6,13 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
+
+////////////
+// TOKENS //
+////////////
 
 type Token struct {
 	value     string
@@ -27,6 +32,21 @@ const (
 var keywords []string = []string{"if", "var", "while", "print"}
 var comparisons []string = []string{"==", ">=", "<=", "!="}
 
+///////////
+// NODES //
+///////////
+
+type Node struct{}
+
+type Assignement struct {
+	varName  string
+	varValue int
+}
+
+//////////
+// MAIN //
+//////////
+
 func main() {
 	args := os.Args[1:] // Skip the program name
 	content, err := os.ReadFile(args[0])
@@ -34,8 +54,11 @@ func main() {
 		log.Fatal("\rCouldn't read file")
 	}
 
+	var startTime time.Time = time.Now()
 	var tokenizedProgram []Token = tokenize(string(content))
+	var elapsed time.Duration = time.Since(startTime)
 	fmt.Println(tokenizedProgram)
+	fmt.Printf("Temps : %s\n", elapsed)
 }
 
 ///////////////
@@ -92,6 +115,14 @@ func tokenize(program string) []Token {
 		i++
 	}
 	return tokenizedProgram
+}
+
+///////////
+// PARSE //
+///////////
+
+func parse(tokenizeProgram []Token) []Node {
+
 }
 
 ///////////
