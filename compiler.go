@@ -38,6 +38,10 @@ func main() {
 	fmt.Println(tokenizedProgram)
 }
 
+///////////////
+// TOKENIZER //
+///////////////
+
 func tokenize(program string) []Token {
 	var tokenizedProgram []Token
 	var line int = 1
