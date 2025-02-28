@@ -7,7 +7,14 @@ class Node:
         self.right = right
 
     def __repr__(self):
-        return f'({self.value}, {self.left}, {self.right})'
+        return self.to_parentheses()
+    
+    def to_parentheses(self):
+        if self.left is None and self.right is None:
+            return str(self.value)
+        left_str = self.left.to_parentheses() if self.left else ''
+        right_str = self.right.to_parentheses() if self.right else ''
+        return f'({left_str} {self.value} {right_str})'
 
 def tokenize(expression):
     tokens = re.findall(r'\d+\.\d+|\d+|[+\-*/()]', expression)
