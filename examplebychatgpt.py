@@ -15,6 +15,24 @@ class Node:
         left_str = self.left.to_parentheses() if self.left else ''
         right_str = self.right.to_parentheses() if self.right else ''
         return f'({left_str} {self.value} {right_str})'
+    
+    def evaluate(self):
+        if self.left is None and self.right is None:
+            return self.value  # It's a number
+        
+        left_value = self.left.evaluate()
+        right_value = self.right.evaluate()
+        
+        if self.value == '+':
+            return left_value + right_value
+        elif self.value == '-':
+            return left_value - right_value
+        elif self.value == '*':
+            return left_value * right_value
+        elif self.value == '/':
+            return left_value / right_value
+        
+        raise ValueError(f"Unknown operator: {self.value}")
 
 def tokenize(expression):
     tokens = re.findall(r'\d+\.\d+|\d+|[+\-*/()]', expression)
@@ -60,5 +78,7 @@ def parse_expression(expression):
     return parser.parse()
 
 # Example usage:
-expr = "3 + 5 * ( 2 - 8 ) / 2"
-print(parse_expression(expr))
+expr = "2-(3+5)*3-2"
+parsed_expr = parse_expression(expr)
+print(parsed_expr)
+print("Result:", parsed_expr.evaluate())
