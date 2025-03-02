@@ -1,0 +1,6 @@
+boolExpr := mathExp ("<" | ">" | "==" | "<=" | ">=") mathExpr (("<" | ">" | "==" | "<=" | ">=") mathExpr)*
+
+mathExpr := Expr
+Expr := Term (("+" | "-") Term)*
+Term := Factor (("*" | "/") Factor)*
+Factor := Number | ("(" Expr ")")
