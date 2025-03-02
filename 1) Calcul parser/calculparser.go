@@ -19,7 +19,7 @@ func NewBinaryOp(value string, left *BinaryOp, right *BinaryOp) *BinaryOp {
 
 func main() {
 	// Test calcul
-	var calcul string = "2-(3+5)*3-2"
+	var calcul string = "2-2"
 	fmt.Println(calcul)
 
 	// Test tree

@@ -20,25 +20,43 @@ func NewBinaryOp(value string, left *BinaryOp, right *BinaryOp) *BinaryOp {
 
 func main() {
 	// Test calcul
-	var calcul string = "()"
+	var calcul string = "1<2<3<4"
 	var tokenizedCalcul []string = tokenize(calcul)
 	fmt.Println(tokenizedCalcul)
 
-	var parsedCalcul BinaryOp = *parseCalcul(tokenizedCalcul)
-	printTree(&parsedCalcul, 2)
-
-	var result int = evaluateCalcul(&parsedCalcul)
-	fmt.Println(result)
+	var parsedExpr *BinaryOp = parse(tokenizedCalcul)
+	printTree(parsedExpr, 2)
+	//var result int = evaluateCalcul(&parsedExpr)
+	//fmt.Println(result)
 }
 
-func parseBoolean(tokenizedExpr []string) *BinaryOp {
-	var node *BinaryOp
-	return node
+func parse(tokenizedExpr []string) *BinaryOp {
+	var parsedExpr *BinaryOp
+	if tokenizedExpr[0] == "BoolExpr" {
+		var pos int
+		parsedExpr = parseBoolean(tokenizedExpr[1:], &pos)
+	} else {
+		var pos int
+		parsedExpr = parseCalcul(tokenizedExpr, &pos)
+	}
+	return parsedExpr
 }
 
-func parseCalcul(tokenizedCalcul []string) *BinaryOp {
-	var pos int
-	return expr(tokenizedCalcul, &pos)
+func parseBoolean(tokenizedExpr []string, pos *int) *BinaryOp {
+	left := parseCalcul(tokenizedExpr, pos)
+
+	for *pos < len(tokenizedExpr) && inList([]string{">=", "<=", "==", "!=", "<", ">"}, tokenizedExpr[*pos]) {
+		op := tokenizedExpr[*pos]
+		*pos++
+		right := parseCalcul(tokenizedExpr, pos)
+		left = NewBinaryOp(op, left, right) // Chain comparisons into a single tree
+	}
+
+	return left
+}
+
+func parseCalcul(tokenizedCalcul []string, pos *int) *BinaryOp {
+	return expr(tokenizedCalcul, pos)
 }
 
 func expr(tokenizedCalcul []string, pos *int) *BinaryOp {
@@ -76,7 +94,7 @@ func factor(tokenizedCalcul []string, pos *int) *BinaryOp {
 	} else if isInt(token) {
 		return NewBinaryOp(token, nil, nil)
 	} else {
-		log.Fatal("Wrong token found (expected a number)")
+		log.Fatal("Wrong token found (expected a number) : " + token)
 		return NewBinaryOp("nil", nil, nil)
 	}
 }
@@ -85,20 +103,51 @@ func factor(tokenizedCalcul []string, pos *int) *BinaryOp {
 // UTILS //
 ///////////
 
-func evaluateCalcul(parsedCalcul *BinaryOp) int {
-	if parsedCalcul.Right == nil && parsedCalcul.Left == nil {
-		return strToInt(parsedCalcul.Value)
-	}
-	var left int = evaluateCalcul(parsedCalcul.Left)
-	var right int = evaluateCalcul(parsedCalcul.Right)
+func tokenize(calcul string) []string {
+	var tokenizedCalcul []string
 
-	if parsedCalcul.Value == "+" {
+	for i := 0; i < len(calcul); i++ {
+		if isInt(string(calcul[i])) {
+			var number string
+			for i < len(calcul) && isInt(string(calcul[i])) {
+				number += string(calcul[i])
+				i++
+			}
+			i--
+			tokenizedCalcul = append(tokenizedCalcul, number)
+		} else if i+1 < len(calcul) && inList([]string{">=", "<=", "==", "!="}, calcul[i:i+2]) {
+			tokenizedCalcul = append(tokenizedCalcul, calcul[i:i+2])
+			if tokenizedCalcul[0] != "BoolExpr" {
+				tokenizedCalcul = append([]string{"BoolExpr"}, tokenizedCalcul...)
+			}
+			i++
+		} else {
+			if calcul[i] != ' ' {
+				tokenizedCalcul = append(tokenizedCalcul, string(calcul[i]))
+				if inList([]string{"<", ">"}, string(calcul[i])) && tokenizedCalcul[0] != "BoolExpr" {
+					tokenizedCalcul = append([]string{"BoolExpr"}, tokenizedCalcul...)
+				}
+			}
+		}
+	}
+
+	return tokenizedCalcul
+}
+
+func evaluateCalcul(parsedExpr *BinaryOp) int {
+	if parsedExpr.Right == nil && parsedExpr.Left == nil {
+		return strToInt(parsedExpr.Value)
+	}
+	var left int = evaluateCalcul(parsedExpr.Left)
+	var right int = evaluateCalcul(parsedExpr.Right)
+
+	if parsedExpr.Value == "+" {
 		return left + right
-	} else if parsedCalcul.Value == "-" {
+	} else if parsedExpr.Value == "-" {
 		return left - right
-	} else if parsedCalcul.Value == "*" {
+	} else if parsedExpr.Value == "*" {
 		return left * right
-	} else if parsedCalcul.Value == "/" {
+	} else if parsedExpr.Value == "/" {
 		if right == 0 {
 			log.Fatal("Cannot divide by 0")
 		}
@@ -115,16 +164,6 @@ func printTree(node *BinaryOp, depth int) {
 	fmt.Printf("%s%s\n", string(make([]rune, depth*2, depth*2)), node.Value)
 	printTree(node.Left, depth+1)
 	printTree(node.Right, depth+1)
-}
-
-func tokenize(calcul string) []string {
-	var tokenizedCalcul []string
-
-	for _, char := range calcul {
-		tokenizedCalcul = append(tokenizedCalcul, string(char))
-	}
-
-	return tokenizedCalcul
 }
 
 func inList(liste []string, item string) bool {
